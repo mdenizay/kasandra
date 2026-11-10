@@ -107,6 +107,14 @@ impl SshTunnel {
             .stderr(Stdio::piped())
             .kill_on_drop(true);
 
+        // ssh.exe is a console program; started from a GUI app on Windows it would get a
+        // console window of its own for as long as the tunnel is open.
+        #[cfg(windows)]
+        {
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            command.creation_flags(CREATE_NO_WINDOW);
+        }
+
         let mut child = command
             .spawn()
             .map_err(|e| DbError::new(format!("Could not start ssh: {e}")))?;

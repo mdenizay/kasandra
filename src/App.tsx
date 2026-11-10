@@ -62,6 +62,8 @@ interface Session {
   schemas: Record<string, string[]>;
   tables: Record<string, TableRef[]>;
   expanded: Set<string>;
+  /** The database the user last opened in the tree; new query tabs start in it. */
+  activeDatabase: string;
 }
 
 type Tab =
@@ -69,6 +71,8 @@ type Tab =
       id: string;
       kind: "query";
       connectionId: string;
+      /** Selected before every run, so the script never needs its own USE. */
+      database: string;
       title: string;
       sql: string;
       results: QueryResult[];
@@ -203,6 +207,7 @@ export function App() {
         next.expanded.delete(database);
       } else {
         next.expanded.add(database);
+        next.activeDatabase = database;
         if (!next.schemas[database]) {
           const schemas = await api.listSchemas(connectionId, database);
           next.schemas[database] = schemas;
@@ -228,7 +233,14 @@ export function App() {
       try {
         const info = await api.connect(profile);
         const databases = await api.listDatabases(profile.id);
-        const session: Session = { info, databases, schemas: {}, tables: {}, expanded: new Set() };
+        const session: Session = {
+          info,
+          databases,
+          schemas: {},
+          tables: {},
+          expanded: new Set(),
+          activeDatabase: info.currentDatabase,
+        };
         setSessions((s) => ({ ...s, [profile.id]: session }));
         setSelectedId(profile.id);
         if (info.currentDatabase && databases.includes(info.currentDatabase)) {
@@ -272,7 +284,16 @@ export function App() {
       const databases = await api.listDatabases(connectionId);
       setSessions((s) => ({
         ...s,
-        [connectionId]: { ...session, databases, schemas: {}, tables: {}, expanded: new Set() },
+        [connectionId]: {
+          ...session,
+          databases,
+          schemas: {},
+          tables: {},
+          expanded: new Set(),
+          activeDatabase: databases.includes(session.activeDatabase)
+            ? session.activeDatabase
+            : session.info.currentDatabase,
+        },
       }));
     },
     [sessions],
@@ -281,11 +302,13 @@ export function App() {
   // MARK: - Tabs
 
   const newQueryTab = useCallback(
-    (connectionId: string, sql = "") => {
+    (connectionId: string, sql = "", database?: string) => {
+      const session = sessions[connectionId];
       const tab: Tab = {
         id: crypto.randomUUID(),
         kind: "query",
         connectionId,
+        database: database ?? session?.activeDatabase ?? session?.info.currentDatabase ?? "",
         title: `${t("chrome.query")} ${tabs.filter((x) => x.kind === "query").length + 1}`,
         sql,
         results: [],
@@ -297,14 +320,14 @@ export function App() {
       setActiveTabId(tab.id);
       return tab;
     },
-    [t, tabs],
+    [sessions, t, tabs],
   );
 
   const openTable = useCallback(
     (profile: ConnectionProfile, table: TableRef) => {
       // Redis has no rows to browse in a grid, so it gets a command instead of a table tab.
       if (!isRelational(profile.kind)) {
-        newQueryTab(profile.id, `SCAN 0 MATCH ${table.name}:* COUNT 100`);
+        newQueryTab(profile.id, `SCAN 0 MATCH ${table.name}:* COUNT 100`, table.database);
         return;
       }
       const existing = tabs.find(
@@ -355,12 +378,17 @@ export function App() {
         id: crypto.randomUUID(),
         sql: script,
         connectionName: profile ? displayName(profile) : "",
-        database: sessions[tab.connectionId]?.info.currentDatabase ?? "",
+        database: tab.database || (sessions[tab.connectionId]?.info.currentDatabase ?? ""),
         executedAt: new Date().toISOString(),
       };
       try {
+        // Connections are shared between tabs, so each run first puts the connection back
+        // in this tab's database. The drivers skip it when nothing would change.
+        if (tab.database) await api.useDatabase(tab.connectionId, tab.database);
         const results = await api.executeSql(tab.connectionId, script, settings.maxResultRows);
-        patchTab(tab.id, { results, resultIndex: 0, running: false });
+        // A USE in the script itself moves the tab along with it.
+        const used = [...script.matchAll(/^\s*use\s+[`"\[]?([^`"\]\s;]+)/gim)].pop()?.[1];
+        patchTab(tab.id, { results, resultIndex: 0, running: false, ...(used ? { database: used } : {}) });
         await api.addHistory(
           { ...base, durationMs: performance.now() - started, succeeded: true, rowCount: results[0]?.rows.length ?? null, errorMessage: null },
           settings.historyLimit,
@@ -422,8 +450,9 @@ export function App() {
   // makes that affordable. It is a convenience, so a schema the user cannot read leaves
   // completion thinner rather than showing an error.
   useEffect(() => {
-    const database = activeSession?.info.currentDatabase;
-    if (!activeConnectionId || !database) {
+    const database =
+      (activeTab?.kind === "query" ? activeTab.database : "") || activeSession?.info.currentDatabase;
+    if (!activeConnectionId || !activeSession || !database) {
       setCompletionSchema({});
       return;
     }
@@ -447,7 +476,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [activeConnectionId, activeSession]);
+  }, [activeConnectionId, activeSession, activeTab?.kind === "query" ? activeTab.database : ""]);
 
   // The shortcuts a database client is expected to have. ⌘↩ belongs to the editor and is
   // bound there; everything here is about the window rather than the text, so it is bound
@@ -826,7 +855,24 @@ export function App() {
                     {t("workspace.readOnly")}
                   </span>
                 )}
-                {activeSession && <span className="hint">{activeSession.info.currentDatabase}</span>}
+                {activeSession && activeSession.databases.length > 1 ? (
+                  <select
+                    value={queryTab.database}
+                    onChange={(e) => patchTab(queryTab.id, { database: e.target.value })}
+                    title={t("workspace.database")}
+                  >
+                    {!activeSession.databases.includes(queryTab.database) && (
+                      <option value={queryTab.database}>{queryTab.database || "—"}</option>
+                    )}
+                    {activeSession.databases.map((database) => (
+                      <option key={database} value={database}>
+                        {database}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  activeSession && <span className="hint">{queryTab.database || activeSession.info.currentDatabase}</span>
+                )}
               </div>
 
               <div className="editor-pane">

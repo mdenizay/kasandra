@@ -60,6 +60,7 @@ export const api = {
   executeSql: (id: string, sql: string, maxRows: number) =>
     invoke<QueryResult[]>("execute_sql", { id, sql, maxRows }),
   cancelQuery: (id: string) => invoke<void>("cancel_query", { id }),
+  useDatabase: (id: string, database: string) => invoke<void>("use_database", { id, database }),
   listDatabases: (id: string) => invoke<string[]>("list_databases", { id }),
   listSchemas: (id: string, database: string) =>
     invoke<string[]>("list_schemas", { id, database }),

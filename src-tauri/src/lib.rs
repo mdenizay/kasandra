@@ -16,6 +16,7 @@ pub fn run() {
     // A self-check that needs no window, so it still answers when the UI is the thing
     // that is broken.
     if std::env::args().any(|arg| arg == "--doctor") {
+        attach_parent_console();
         std::process::exit(doctor::run());
     }
 
@@ -70,3 +71,20 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running MieSQL");
 }
+
+/// A release build on Windows has no console of its own, so `--doctor` borrows the one it
+/// was started from; otherwise its report would go nowhere.
+#[cfg(windows)]
+fn attach_parent_console() {
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn AttachConsole(process_id: u32) -> i32;
+    }
+    const ATTACH_PARENT_PROCESS: u32 = u32::MAX;
+    unsafe {
+        AttachConsole(ATTACH_PARENT_PROCESS);
+    }
+}
+
+#[cfg(not(windows))]
+fn attach_parent_console() {}
