@@ -498,3 +498,41 @@ pub async fn csv_import(
     }
     Ok(applied)
 }
+
+// MARK: - Terminal
+
+#[tauri::command]
+pub fn terminal_open(
+    app: tauri::AppHandle,
+    terminals: State<'_, crate::terminal::TerminalManager>,
+    id: String,
+    target: crate::terminal::TerminalTarget,
+    cols: u16,
+    rows: u16,
+) -> R<String> {
+    terminals.open(&app, id, target, cols, rows)
+}
+
+#[tauri::command]
+pub fn terminal_write(
+    terminals: State<'_, crate::terminal::TerminalManager>,
+    id: String,
+    data: String,
+) -> R<()> {
+    terminals.write(&id, &data)
+}
+
+#[tauri::command]
+pub fn terminal_resize(
+    terminals: State<'_, crate::terminal::TerminalManager>,
+    id: String,
+    cols: u16,
+    rows: u16,
+) -> R<()> {
+    terminals.resize(&id, cols, rows)
+}
+
+#[tauri::command]
+pub fn terminal_close(terminals: State<'_, crate::terminal::TerminalManager>, id: String) {
+    terminals.close(&id);
+}

@@ -193,6 +193,15 @@ input[type="checkbox"] { width: auto; }
   display: flex; align-items: center; gap: 6px;
   padding: 5px 8px; border-bottom: 1px solid var(--border); background: var(--bg-raised);
 }
+.terminal-host { flex: 1; min-height: 0; flex-direction: column; position: relative; background: var(--bg); }
+.terminal-mount { flex: 1; min-height: 0; padding: 6px 0 0 8px; }
+.terminal-mount .xterm { height: 100%; }
+.terminal-ended {
+  position: absolute; right: 14px; bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg-raised); color: var(--text-muted); font-size: 12px;
+}
 .result-tabs { overflow-x: auto; flex-shrink: 0; }
 .result-tabs > * { flex-shrink: 0; }
 .result-tab { display: flex; align-items: center; gap: 6px; }

@@ -61,11 +61,18 @@ rusqlite = { version = "0.40", features = ["bundled", "column_decltype"] }
 
 redis = { version = "0.32", features = ["tokio-comp", "tokio-rustls-comp"] }
 async-trait = "0.1.92"
+
+# Terminal tabs. A real pty is what makes vim, htop and tmux behave, and portable-pty
+# gives the same API over ConPTY on Windows. base64 carries its raw bytes to the webview.
+portable-pty = "0.9"
+base64 = "0.22"
 tauri-plugin-updater = "2.0.0-rc.4"
 tauri-plugin-process = "2.0.0-rc.1"
 tauri-plugin-clipboard-manager = "2.1.0-beta.7"
 
 [dev-dependencies]
+# The mock runtime, so the terminal tests can drive a real pty without a window.
+tauri = { version = "2", features = ["test"] }
 tempfile = "3"
 uuid = { version = "1", features = ["v4"] }
 

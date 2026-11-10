@@ -2,6 +2,12 @@
 // here, so the invoke names live in one place.
 
 import { invoke } from "@tauri-apps/api/core";
+
+/** What a terminal tab connects to; mirrors `terminal::TerminalTarget`. */
+export type TerminalTarget =
+  | { kind: "local" }
+  | { kind: "profile"; profileId: string }
+  | { kind: "host"; host: string; port: number | null; username: string; keyPath: string };
 import type {
   AppSettings,
   ColumnInfo,
@@ -124,4 +130,11 @@ export const api = {
     invoke<CsvPreview>("csv_preview", { path, options }),
   csvImport: (id: string, table: TableRef, path: string, options: CsvOptions) =>
     invoke<number>("csv_import", { id, table, path, options }),
+
+  terminalOpen: (id: string, target: TerminalTarget, cols: number, rows: number) =>
+    invoke<string>("terminal_open", { id, target, cols, rows }),
+  terminalWrite: (id: string, data: string) => invoke<void>("terminal_write", { id, data }),
+  terminalResize: (id: string, cols: number, rows: number) =>
+    invoke<void>("terminal_resize", { id, cols, rows }),
+  terminalClose: (id: string) => invoke<void>("terminal_close", { id }),
 };

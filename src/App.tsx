@@ -30,7 +30,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { save as saveDialog } from "@tauri-apps/plugin-dialog";
-import { api } from "./lib/api";
+import { api, type TerminalTarget } from "./lib/api";
 import { makeTranslator, type LanguageCode } from "./lib/i18n";
 import { useUpdater } from "./lib/useUpdater";
 import { UpdateBanner } from "./components/UpdateBanner";
@@ -40,6 +40,8 @@ import { SqlEditor } from "./components/SqlEditor";
 import { ResultGrid } from "./components/ResultGrid";
 import { TableTab } from "./components/TableTab";
 import { HistoryPanel } from "./components/HistoryPanel";
+import { SshDialog } from "./components/SshDialog";
+import { TerminalTab } from "./components/TerminalTab";
 import { ContextMenu, type MenuItem } from "./components/ContextMenu";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { CsvImportSheet, DumpSheet, RunScriptSheet } from "./components/TransferSheets";
@@ -80,7 +82,17 @@ type Tab =
       error: string | null;
       running: boolean;
     }
-  | { id: string; kind: "table"; connectionId: string; title: string; table: TableRef };
+  | { id: string; kind: "table"; connectionId: string; title: string; table: TableRef }
+  | {
+      id: string;
+      kind: "terminal";
+      /** Always empty: a terminal does not belong to a database connection. */
+      connectionId: "";
+      title: string;
+      target: TerminalTarget;
+      /** Replaced to reconnect, which starts a fresh session in the same tab. */
+      sessionId: string;
+    };
 
 const KIND_COLOR: Record<string, string> = {
   postgres: "#3b82f6",
@@ -134,6 +146,7 @@ export function App() {
   const [editing, setEditing] = useState<{ profile: ConnectionProfile; urlMode: boolean } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showSshDialog, setShowSshDialog] = useState(false);
   const [dumpFor, setDumpFor] = useState<{ connectionId: string; database: string } | null>(null);
   const [scriptFor, setScriptFor] = useState<string | null>(null);
   const [importFor, setImportFor] = useState<{ connectionId: string; table: TableRef } | null>(null);
@@ -182,7 +195,7 @@ export function App() {
   }, [settings]);
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
-  const activeConnectionId = activeTab?.connectionId ?? selectedId;
+  const activeConnectionId = activeTab?.connectionId || selectedId;
   const activeProfile = profiles.find((p) => p.id === activeConnectionId) ?? null;
   const activeSession = activeConnectionId ? sessions[activeConnectionId] : undefined;
   const selectedProfile = profiles.find((p) => p.id === selectedId) ?? null;
@@ -322,6 +335,25 @@ export function App() {
     },
     [sessions, t, tabs],
   );
+
+  const openTerminal = useCallback((target: TerminalTarget, title: string) => {
+    const tab: Tab = {
+      id: crypto.randomUUID(),
+      kind: "terminal",
+      connectionId: "",
+      title,
+      target,
+      sessionId: crypto.randomUUID(),
+    };
+    setTabs((current) => [...current, tab]);
+    setActiveTabId(tab.id);
+  }, []);
+
+  const patchTerminal = useCallback((id: string, changes: Partial<Extract<Tab, { kind: "terminal" }>>) => {
+    setTabs((current) =>
+      current.map((tab) => (tab.id === id && tab.kind === "terminal" ? { ...tab, ...changes } : tab)),
+    );
+  }, []);
 
   const openTable = useCallback(
     (profile: ConnectionProfile, table: TableRef) => {
@@ -496,6 +528,9 @@ export function App() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      // Inside a terminal, Ctrl+R, Ctrl+W, Ctrl+T and the rest belong to the shell. ⌘ on
+      // macOS never reaches the shell, so those shortcuts keep working there.
+      if (event.ctrlKey && !event.metaKey && (event.target as HTMLElement | null)?.closest?.(".terminal-host")) return;
       const active = tabs.find((tab) => tab.id === activeTabId) ?? null;
       switch (event.key) {
         case "t":
@@ -547,6 +582,16 @@ export function App() {
           ? { label: t("menu.disconnect"), icon: PowerIcon, onSelect: () => void disconnect(profile.id) }
           : { label: t("menu.connect"), icon: BoltIcon, onSelect: () => void connect(profile) },
         { label: t("menu.newQuery"), icon: CommandLineIcon, disabled: !connected, onSelect: () => newQueryTab(profile.id) },
+        {
+          label: t("menu.sshTerminal"),
+          icon: CommandLineIcon,
+          disabled: !profile.sshEnabled || !profile.sshHost.trim(),
+          onSelect: () =>
+            openTerminal(
+              { kind: "profile", profileId: profile.id },
+              profile.sshUsername ? `${profile.sshUsername}@${profile.sshHost}` : profile.sshHost,
+            ),
+        },
         { label: t("menu.refresh"), icon: ArrowPathIcon, disabled: !connected, onSelect: () => void refreshTree(profile.id), separatorBefore: true },
         {
           label: t("menu.dump"),
@@ -597,7 +642,7 @@ export function App() {
         },
       ];
     },
-    [connect, disconnect, newQueryTab, refreshTree, selectedId, sessions, t],
+    [connect, disconnect, newQueryTab, openTerminal, refreshTree, selectedId, sessions, t],
   );
 
   const visibleProfiles = useMemo(() => {
@@ -659,6 +704,10 @@ export function App() {
           {t("general.refresh")}
         </button>
         <div className="chrome-divider" />
+        <button className="chrome-button" onClick={() => setShowSshDialog(true)}>
+          <CommandLineIcon className="icon-lg" />
+          {t("chrome.terminal")}
+        </button>
         <button className="chrome-button" onClick={() => setShowHistory(true)}>
           <ClockIcon className="icon-lg" />
           {t("chrome.history")}
@@ -807,7 +856,7 @@ export function App() {
                     if (e.button === 1) closeTab(tab.id);
                   }}
                 >
-                  {tab.kind === "query" ? <CommandLineIcon className="icon" /> : <TableCellsIcon className="icon" />}
+                  {tab.kind === "table" ? <TableCellsIcon className="icon" /> : <CommandLineIcon className="icon" />}
                   {tab.title}
                   <span className="close" onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}>
                     <XMarkIcon className="icon" style={{ width: 12, height: 12 }} />
@@ -831,6 +880,23 @@ export function App() {
                 </button>
               )}
             </div>
+          )}
+
+          {/* Terminals stay mounted while hidden, so switching tabs keeps the session. */}
+          {tabs.map(
+            (tab) =>
+              tab.kind === "terminal" && (
+                <TerminalTab
+                  key={tab.sessionId}
+                  sessionId={tab.sessionId}
+                  target={tab.target}
+                  active={tab.id === activeTabId}
+                  fontSize={settings.editorFontSize}
+                  t={t}
+                  onTitle={(title) => patchTerminal(tab.id, { title })}
+                  onReconnect={() => patchTerminal(tab.id, { sessionId: crypto.randomUUID() })}
+                />
+              ),
           )}
 
           {activeTab?.kind === "table" && (
@@ -1050,6 +1116,17 @@ export function App() {
           }}
           updater={updater}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {showSshDialog && (
+        <SshDialog
+          t={t}
+          onCancel={() => setShowSshDialog(false)}
+          onOpen={(target) => {
+            setShowSshDialog(false);
+            openTerminal(target, target.kind === "host" ? target.host : t("chrome.terminal"));
+          }}
         />
       )}
 

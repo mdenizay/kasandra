@@ -8,6 +8,7 @@ pub mod sql;
 pub mod ssh;
 pub mod state;
 pub mod storage;
+pub mod terminal;
 pub mod tls;
 pub mod transfer;
 
@@ -28,6 +29,14 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .manage(state::AppState::default())
+        .manage(terminal::TerminalManager::default())
+        .on_window_event(|window, event| {
+            // No ssh session should outlive the window that shows it.
+            if let tauri::WindowEvent::Destroyed = event {
+                use tauri::Manager;
+                window.state::<terminal::TerminalManager>().close_all();
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             commands::list_profiles,
             commands::save_profile,
@@ -67,6 +76,10 @@ pub fn run() {
             commands::run_script_file,
             commands::csv_preview,
             commands::csv_import,
+            commands::terminal_open,
+            commands::terminal_write,
+            commands::terminal_resize,
+            commands::terminal_close,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Kasandra");

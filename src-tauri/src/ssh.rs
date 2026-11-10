@@ -191,7 +191,7 @@ async fn collect_stderr(stream: tokio::process::ChildStderr) -> String {
     collected.join("\n")
 }
 
-fn which_ssh() -> Option<std::path::PathBuf> {
+pub(crate) fn which_ssh() -> Option<std::path::PathBuf> {
     let name = if cfg!(windows) { "ssh.exe" } else { "ssh" };
     std::env::var_os("PATH").and_then(|paths| {
         std::env::split_paths(&paths)
