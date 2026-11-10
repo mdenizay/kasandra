@@ -1,47 +1,30 @@
-MieSQL 1.0 — a fast, cross-platform SQL client for PostgreSQL, MySQL, MariaDB, SQLite and
-Redis. Everything stays on your machine.
+Kasandra 1.1 — the SQL client formerly known as MieSQL. Same app, new name: it updates in
+place and keeps your connections, saved passwords, history and settings.
 
-## New in 1.0
+## New in 1.1
 
-**Stop a running query.** The one thing a SQL client cannot be without. PostgreSQL cancels
-over its own protocol, MySQL and MariaDB through `KILL QUERY` on a second login, SQLite by
-interrupt. The session survives in every case, so you keep your transaction, your
-temporary tables and your selected database. Redis has no way to stop a command without
-dropping the connection, and the app says so rather than offering a button that does
-nothing.
+**Query tabs remember their database.** A new query tab starts in the database you last
+opened in the sidebar, and a picker in the toolbar switches it. The database is selected
+before every run, so scripts no longer need their own `USE`.
 
-**Add rows in the grid.** Alongside editing and deleting. An added row sends only the
-columns you filled in, so defaults and auto-increment still apply, and — as with every
-other edit — you see the exact `INSERT` before it runs.
+**Close result tabs.** A script with many statements no longer leaves a row of results you
+cannot get rid of: close them one by one, all at once, or with a middle click.
 
-**Completion knows your columns**, not just your table names. One query per schema, so it
-stays cheap on a database with hundreds of tables.
-
-**Run the selection.** `⌘↩` runs the highlighted text when there is a selection and the
-whole script otherwise. `⌘F` searches the editor, `⌘C` copies the selected rows as TSV,
-and `⌘T` `⌘W` `⌘N` `⌘R` `⌘,` `⌘.` cover tabs, connections, refresh, settings and stop.
+**Middle click closes tabs**, in the editor tab bar too.
 
 ## Fixed
 
-- **Typing into a NULL cell produced `NULLwhatever you typed`.** The editor opened
-  pre-filled with the literal word `NULL` and typing appended to it. Cells now open empty
-  with `NULL` as the placeholder, and leaving one empty keeps it NULL rather than silently
-  writing an empty string — the two are not the same value.
-- **A second query tab shared the first one's editor handlers**, so typing in one tab
-  wrote into the other tab's text.
-- The table header showed a bare `.` instead of `schema.table`.
-
-## Also
-
-The unused `mongodb` dependency is gone, and the Swift sources the Tauri rewrite replaced
-have been removed — they remain at the `v0.1.0` tag.
+- **Windows opened a terminal window behind the app** on every start, and another for each
+  SSH tunnel. Both are gone. `Kasandra.exe --doctor` still prints its report to the
+  console it was started from.
+- Right-clicking empty space showed the webview's own Back / Refresh / Save as menu.
 
 ## Install
 
 | Platform | File |
 | --- | --- |
-| macOS (Apple Silicon and Intel) | `MieSQL_1.0.0_universal.dmg` |
-| Windows | `MieSQL_1.0.0_x64-setup.exe` |
+| macOS (Apple Silicon and Intel) | `Kasandra_1.1.0_universal.dmg`, or `brew install --cask mdenizay/tap/kasandra` |
+| Windows | `Kasandra_1.1.0_x64-setup.exe` |
 | Linux | `.AppImage`, `.deb` or `.rpm` |
 
 macOS is signed with a Developer ID and notarised, so it opens with no warning. The
