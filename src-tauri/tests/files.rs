@@ -1,7 +1,8 @@
 use miesql_lib::files::{
-    join_remote, mode_string, parse_ftp_listing, EntryKind, FileManager, FileSite, FileTarget,
-    Protocol,
+    join_remote, mode_string, parse_ftp_listing, EntryKind, FileTarget, Protocol,
 };
+#[cfg(unix)]
+use miesql_lib::files::{FileManager, FileSite};
 
 #[test]
 fn remote_paths() {
@@ -104,6 +105,9 @@ fn site_targets_deserialise() {
 /// rename, delete. Runs only when pointed at one, for example
 /// `KASANDRA_TEST_SITE='ftp://user:pass@127.0.0.1:2121/'` or
 /// `KASANDRA_TEST_SITE='sftp://me@127.0.0.1:2222/tmp/x?key=/path/to/key'`.
+// Unix only, like the terminal test: a test binary that links the Tauri runtime does not
+// start on Windows CI (STATUS_ENTRYPOINT_NOT_FOUND).
+#[cfg(unix)]
 #[test]
 fn live_round_trip() {
     let Ok(url) = std::env::var("KASANDRA_TEST_SITE") else {
@@ -200,6 +204,7 @@ fn live_round_trip() {
     });
 }
 
+#[cfg(unix)]
 fn site_from_url(url: &str) -> (FileSite, Option<String>) {
     let (scheme, rest) = url.split_once("://").unwrap();
     let (rest, query) = rest.split_once('?').unwrap_or((rest, ""));
