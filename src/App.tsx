@@ -16,6 +16,7 @@ import {
   ExclamationTriangleIcon,
   EyeIcon,
   FolderIcon,
+  FolderOpenIcon,
   LinkIcon,
   LockClosedIcon,
   MagnifyingGlassIcon,
@@ -30,7 +31,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { save as saveDialog } from "@tauri-apps/plugin-dialog";
-import { api, type TerminalTarget } from "./lib/api";
+import { api, type FileTarget, type TerminalTarget } from "./lib/api";
 import { makeTranslator, type LanguageCode } from "./lib/i18n";
 import { useUpdater } from "./lib/useUpdater";
 import { UpdateBanner } from "./components/UpdateBanner";
@@ -42,6 +43,8 @@ import { TableTab } from "./components/TableTab";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { SshDialog } from "./components/SshDialog";
 import { TerminalTab } from "./components/TerminalTab";
+import { FilesTab } from "./components/FilesTab";
+import { FilesDialog } from "./components/FilesDialog";
 import { ContextMenu, type MenuItem } from "./components/ContextMenu";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { CsvImportSheet, DumpSheet, RunScriptSheet } from "./components/TransferSheets";
@@ -91,6 +94,15 @@ type Tab =
       title: string;
       target: TerminalTarget;
       /** Replaced to reconnect, which starts a fresh session in the same tab. */
+      sessionId: string;
+    }
+  | {
+      id: string;
+      kind: "files";
+      /** Always empty, as for terminals. */
+      connectionId: "";
+      title: string;
+      target: FileTarget;
       sessionId: string;
     };
 
@@ -147,6 +159,7 @@ export function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showSshDialog, setShowSshDialog] = useState(false);
+  const [showFilesDialog, setShowFilesDialog] = useState(false);
   const [dumpFor, setDumpFor] = useState<{ connectionId: string; database: string } | null>(null);
   const [scriptFor, setScriptFor] = useState<string | null>(null);
   const [importFor, setImportFor] = useState<{ connectionId: string; table: TableRef } | null>(null);
@@ -347,6 +360,25 @@ export function App() {
     };
     setTabs((current) => [...current, tab]);
     setActiveTabId(tab.id);
+  }, []);
+
+  const openFiles = useCallback((target: FileTarget, title: string) => {
+    const tab: Tab = {
+      id: crypto.randomUUID(),
+      kind: "files",
+      connectionId: "",
+      title,
+      target,
+      sessionId: crypto.randomUUID(),
+    };
+    setTabs((current) => [...current, tab]);
+    setActiveTabId(tab.id);
+  }, []);
+
+  const patchFiles = useCallback((id: string, changes: Partial<Extract<Tab, { kind: "files" }>>) => {
+    setTabs((current) =>
+      current.map((tab) => (tab.id === id && tab.kind === "files" ? { ...tab, ...changes } : tab)),
+    );
   }, []);
 
   const patchTerminal = useCallback((id: string, changes: Partial<Extract<Tab, { kind: "terminal" }>>) => {
@@ -592,6 +624,16 @@ export function App() {
               profile.sshUsername ? `${profile.sshUsername}@${profile.sshHost}` : profile.sshHost,
             ),
         },
+        {
+          label: t("menu.browseFiles"),
+          icon: FolderOpenIcon,
+          disabled: !profile.sshEnabled || !profile.sshHost.trim(),
+          onSelect: () =>
+            openFiles(
+              { kind: "profile", profileId: profile.id },
+              profile.sshUsername ? `${profile.sshUsername}@${profile.sshHost}` : profile.sshHost,
+            ),
+        },
         { label: t("menu.refresh"), icon: ArrowPathIcon, disabled: !connected, onSelect: () => void refreshTree(profile.id), separatorBefore: true },
         {
           label: t("menu.dump"),
@@ -642,7 +684,7 @@ export function App() {
         },
       ];
     },
-    [connect, disconnect, newQueryTab, openTerminal, refreshTree, selectedId, sessions, t],
+    [connect, disconnect, newQueryTab, openFiles, openTerminal, refreshTree, selectedId, sessions, t],
   );
 
   const visibleProfiles = useMemo(() => {
@@ -707,6 +749,10 @@ export function App() {
         <button className="chrome-button" onClick={() => setShowSshDialog(true)}>
           <CommandLineIcon className="icon-lg" />
           {t("chrome.terminal")}
+        </button>
+        <button className="chrome-button" onClick={() => setShowFilesDialog(true)}>
+          <FolderOpenIcon className="icon-lg" />
+          {t("chrome.files")}
         </button>
         <button className="chrome-button" onClick={() => setShowHistory(true)}>
           <ClockIcon className="icon-lg" />
@@ -856,7 +902,13 @@ export function App() {
                     if (e.button === 1) closeTab(tab.id);
                   }}
                 >
-                  {tab.kind === "table" ? <TableCellsIcon className="icon" /> : <CommandLineIcon className="icon" />}
+                  {tab.kind === "table" ? (
+                    <TableCellsIcon className="icon" />
+                  ) : tab.kind === "files" ? (
+                    <FolderOpenIcon className="icon" />
+                  ) : (
+                    <CommandLineIcon className="icon" />
+                  )}
                   {tab.title}
                   <span className="close" onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}>
                     <XMarkIcon className="icon" style={{ width: 12, height: 12 }} />
@@ -895,6 +947,22 @@ export function App() {
                   t={t}
                   onTitle={(title) => patchTerminal(tab.id, { title })}
                   onReconnect={() => patchTerminal(tab.id, { sessionId: crypto.randomUUID() })}
+                />
+              ),
+          )}
+
+          {/* File browsers too, so a running transfer survives switching tabs. */}
+          {tabs.map(
+            (tab) =>
+              tab.kind === "files" && (
+                <FilesTab
+                  key={tab.sessionId}
+                  sessionId={tab.sessionId}
+                  target={tab.target}
+                  active={tab.id === activeTabId}
+                  t={t}
+                  onTitle={(title) => patchFiles(tab.id, { title })}
+                  onReconnect={() => patchFiles(tab.id, { sessionId: crypto.randomUUID() })}
                 />
               ),
           )}
@@ -1126,6 +1194,17 @@ export function App() {
           onOpen={(target) => {
             setShowSshDialog(false);
             openTerminal(target, target.kind === "host" ? target.host : t("chrome.terminal"));
+          }}
+        />
+      )}
+
+      {showFilesDialog && (
+        <FilesDialog
+          t={t}
+          onCancel={() => setShowFilesDialog(false)}
+          onOpen={(target, title) => {
+            setShowFilesDialog(false);
+            openFiles(target, title);
           }}
         />
       )}

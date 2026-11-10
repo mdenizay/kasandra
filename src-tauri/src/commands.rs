@@ -536,3 +536,140 @@ pub fn terminal_resize(
 pub fn terminal_close(terminals: State<'_, crate::terminal::TerminalManager>, id: String) {
     terminals.close(&id);
 }
+
+// MARK: - Remote files
+
+use crate::files::{FileManager, FileSite, FileTarget, OpenedSession, RemoteEntry};
+
+#[tauri::command]
+pub fn files_list_sites() -> Vec<FileSite> {
+    storage::load_sites()
+}
+
+/// Saves a site. A non-empty password is stored when the site keeps one; turning
+/// "save password" off forgets whatever was stored.
+#[tauri::command]
+pub fn files_save_site(site: FileSite, password: Option<String>) -> R<Vec<FileSite>> {
+    let mut sites = storage::load_sites();
+    match sites.iter_mut().find(|s| s.id == site.id) {
+        Some(existing) => *existing = site.clone(),
+        None => sites.push(site.clone()),
+    }
+    storage::save_sites(&sites)?;
+    if site.save_password {
+        if let Some(password) = password.filter(|p| !p.is_empty()) {
+            storage::save_password(&site.credential_account(), &password)?;
+        }
+    } else {
+        storage::delete_password(&site.credential_account());
+    }
+    Ok(sites)
+}
+
+#[tauri::command]
+pub fn files_delete_site(id: Uuid) -> R<Vec<FileSite>> {
+    let mut sites = storage::load_sites();
+    if let Some(site) = sites.iter().find(|s| s.id == id) {
+        storage::delete_password(&site.credential_account());
+    }
+    sites.retain(|s| s.id != id);
+    storage::save_sites(&sites)?;
+    Ok(sites)
+}
+
+#[tauri::command]
+pub async fn files_open(
+    files: State<'_, FileManager>,
+    id: String,
+    target: FileTarget,
+) -> R<OpenedSession> {
+    files.open(id, target).await
+}
+
+#[tauri::command]
+pub async fn files_list(
+    files: State<'_, FileManager>,
+    id: String,
+    path: String,
+) -> R<Vec<RemoteEntry>> {
+    files.list(&id, &path).await
+}
+
+#[tauri::command]
+pub async fn files_mkdir(files: State<'_, FileManager>, id: String, path: String) -> R<()> {
+    files.mkdir(&id, &path).await
+}
+
+#[tauri::command]
+pub async fn files_rename(
+    files: State<'_, FileManager>,
+    id: String,
+    from: String,
+    to: String,
+) -> R<()> {
+    files.rename(&id, &from, &to).await
+}
+
+#[tauri::command]
+pub async fn files_delete(
+    files: State<'_, FileManager>,
+    id: String,
+    path: String,
+    is_dir: bool,
+) -> R<()> {
+    files.delete(&id, &path, is_dir).await
+}
+
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+pub async fn files_download(
+    app: tauri::AppHandle,
+    files: State<'_, FileManager>,
+    id: String,
+    transfer_id: String,
+    remote_path: String,
+    is_dir: bool,
+    local_path: String,
+) -> R<()> {
+    files
+        .download(
+            &app,
+            &id,
+            &transfer_id,
+            &remote_path,
+            is_dir,
+            std::path::Path::new(&local_path),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn files_upload(
+    app: tauri::AppHandle,
+    files: State<'_, FileManager>,
+    id: String,
+    transfer_id: String,
+    local_path: String,
+    remote_dir: String,
+) -> R<String> {
+    files
+        .upload(
+            &app,
+            &id,
+            &transfer_id,
+            std::path::Path::new(&local_path),
+            &remote_dir,
+        )
+        .await
+}
+
+#[tauri::command]
+pub fn files_cancel(files: State<'_, FileManager>, transfer_id: String) {
+    files.cancel(&transfer_id);
+}
+
+#[tauri::command]
+pub async fn files_close(files: State<'_, FileManager>, id: String) -> R<()> {
+    files.close(&id).await;
+    Ok(())
+}

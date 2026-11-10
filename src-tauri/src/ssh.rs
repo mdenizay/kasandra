@@ -233,7 +233,7 @@ pub fn write_askpass_helper(password: &str) -> DbResult<std::path::PathBuf> {
 }
 
 #[cfg(windows)]
-fn write_askpass_helper(_password: &str) -> DbResult<std::path::PathBuf> {
+pub(crate) fn write_askpass_helper(_password: &str) -> DbResult<std::path::PathBuf> {
     // Windows ssh.exe does not honour SSH_ASKPASS, so there is nowhere to put the
     // password. Saying so beats a tunnel that hangs on an invisible prompt.
     Err(

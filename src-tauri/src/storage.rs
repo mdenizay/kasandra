@@ -32,6 +32,9 @@ fn history_file() -> PathBuf {
 fn snippets_file() -> PathBuf {
     support_dir().join("snippets.json")
 }
+fn sites_file() -> PathBuf {
+    support_dir().join("file-sites.json")
+}
 
 /// Writes through a temporary file so an interrupted save cannot leave a half-written
 /// file behind.
@@ -74,6 +77,16 @@ pub fn load_profiles() -> Vec<ConnectionProfile> {
 
 pub fn save_profiles(profiles: &[ConnectionProfile]) -> DbResult<()> {
     write_atomic(&connections_file(), &profiles)
+}
+
+// MARK: - File sites
+
+pub fn load_sites() -> Vec<crate::files::FileSite> {
+    read_or_default::<Vec<crate::files::FileSite>>(&sites_file())
+}
+
+pub fn save_sites(sites: &[crate::files::FileSite]) -> DbResult<()> {
+    write_atomic(&sites_file(), &sites)
 }
 
 // MARK: - Credentials

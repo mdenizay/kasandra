@@ -50,6 +50,9 @@ npm run app:build
 - **SSH terminal** in a tab: open one on a connection's SSH host, on any `user@host`, or a
   shell on this computer. A real pty, so vim, htop and tmux behave; a saved SSH password
   is typed in for you at the login prompt
+- **Remote files** over SFTP, FTP and FTPS: browse, upload (or drop files in from the
+  desktop), download whole folders, rename and delete, with progress and cancel. A site
+  manager keeps servers, and any connection with an SSH host opens straight into SFTP
 - Add a connection by pasting its URL — see [Connection URLs](#connection-urls)
 - Passwords in the OS credential store: Keychain, Credential Manager or the Secret Service
 - Per-connection **read-only mode** that blocks writes and DDL before they leave the app
@@ -222,7 +225,7 @@ kimlik deposunda parola saklama; bağlantı bazlı salt okunur kipi; sözdizimi 
 ve şema farkında tamamlamalı SQL editörü; 100 bin satırı akıcı gezen sanallaştırılmış
 sonuç tablosu; bağlantı URL'i yapıştırarak ekleme; otomatik güncelleme; açık/koyu tema.
 
-SSH tüneli, sekmede SSH terminali, düzenlenebilir tablo (çalıştırmadan önce ifadeleri gösterir), Yapı/DDL
+SSH tüneli, sekmede SSH terminali, SFTP/FTP/FTPS dosya yöneticisi, düzenlenebilir tablo (çalıştırmadan önce ifadeleri gösterir), Yapı/DDL
 sekmeleri, dump/restore, CSV içe aktarma ve Türkçe arayüz dahildir. MongoDB ve Firebase
 henüz yok.
 

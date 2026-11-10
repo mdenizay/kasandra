@@ -8,6 +8,51 @@ export type TerminalTarget =
   | { kind: "local" }
   | { kind: "profile"; profileId: string }
   | { kind: "host"; host: string; port: number | null; username: string; keyPath: string };
+export type FileProtocol = "ftp" | "ftps" | "sftp";
+
+/** A saved server in the file site manager; mirrors `files::FileSite`. */
+export interface FileSite {
+  id: string;
+  name: string;
+  protocol: FileProtocol;
+  host: string;
+  /** 0 means the protocol's usual port. */
+  port: number;
+  username: string;
+  keyPath: string;
+  initialPath: string;
+  savePassword: boolean;
+  activeMode: boolean;
+}
+
+/** What a file browser tab connects to; mirrors `files::FileTarget`. */
+export type FileTarget =
+  | { kind: "site"; site: FileSite; password: string | null }
+  | { kind: "profile"; profileId: string };
+
+export interface RemoteEntry {
+  name: string;
+  path: string;
+  kind: "dir" | "file" | "link";
+  link: boolean;
+  size: number;
+  modified: number | null;
+  permissions: string | null;
+}
+
+export interface OpenedFileSession {
+  home: string;
+  title: string;
+  protocol: FileProtocol;
+}
+
+export interface FileProgress {
+  transferId: string;
+  done: number;
+  total: number;
+  file: string;
+}
+
 import type {
   AppSettings,
   ColumnInfo,
@@ -137,4 +182,20 @@ export const api = {
   terminalResize: (id: string, cols: number, rows: number) =>
     invoke<void>("terminal_resize", { id, cols, rows }),
   terminalClose: (id: string) => invoke<void>("terminal_close", { id }),
+
+  filesListSites: () => invoke<FileSite[]>("files_list_sites"),
+  filesSaveSite: (site: FileSite, password: string | null) =>
+    invoke<FileSite[]>("files_save_site", { site, password }),
+  filesDeleteSite: (id: string) => invoke<FileSite[]>("files_delete_site", { id }),
+  filesOpen: (id: string, target: FileTarget) => invoke<OpenedFileSession>("files_open", { id, target }),
+  filesList: (id: string, path: string) => invoke<RemoteEntry[]>("files_list", { id, path }),
+  filesMkdir: (id: string, path: string) => invoke<void>("files_mkdir", { id, path }),
+  filesRename: (id: string, from: string, to: string) => invoke<void>("files_rename", { id, from, to }),
+  filesDelete: (id: string, path: string, isDir: boolean) => invoke<void>("files_delete", { id, path, isDir }),
+  filesDownload: (id: string, transferId: string, remotePath: string, isDir: boolean, localPath: string) =>
+    invoke<void>("files_download", { id, transferId, remotePath, isDir, localPath }),
+  filesUpload: (id: string, transferId: string, localPath: string, remoteDir: string) =>
+    invoke<string>("files_upload", { id, transferId, localPath, remoteDir }),
+  filesCancel: (transferId: string) => invoke<void>("files_cancel", { transferId }),
+  filesClose: (id: string) => invoke<void>("files_close", { id }),
 };

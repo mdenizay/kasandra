@@ -3,6 +3,7 @@ pub mod connection_url;
 pub mod doctor;
 pub mod drivers;
 pub mod error;
+pub mod files;
 pub mod models;
 pub mod sql;
 pub mod ssh;
@@ -30,11 +31,13 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .manage(state::AppState::default())
         .manage(terminal::TerminalManager::default())
+        .manage(files::FileManager::default())
         .on_window_event(|window, event| {
             // No ssh session should outlive the window that shows it.
             if let tauri::WindowEvent::Destroyed = event {
                 use tauri::Manager;
                 window.state::<terminal::TerminalManager>().close_all();
+                window.state::<files::FileManager>().close_all();
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -80,6 +83,18 @@ pub fn run() {
             commands::terminal_write,
             commands::terminal_resize,
             commands::terminal_close,
+            commands::files_list_sites,
+            commands::files_save_site,
+            commands::files_delete_site,
+            commands::files_open,
+            commands::files_list,
+            commands::files_mkdir,
+            commands::files_rename,
+            commands::files_delete,
+            commands::files_download,
+            commands::files_upload,
+            commands::files_cancel,
+            commands::files_close,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Kasandra");
