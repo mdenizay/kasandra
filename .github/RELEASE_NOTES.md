@@ -1,34 +1,27 @@
-Kasandra 1.1 — the SQL client formerly known as MieSQL. Same app, new name: it updates in
-place and keeps your connections, saved passwords, history and settings.
+Kasandra 1.2 adds a terminal.
 
-## New in 1.1
+## New in 1.2
 
-**Query tabs remember their database.** A new query tab starts in the database you last
-opened in the sidebar, and a picker in the toolbar switches it. The database is selected
-before every run, so scripts no longer need their own `USE`.
+**SSH terminal in a tab.** Open one from a connection's menu (**SSH Terminal**) to land on
+its SSH host, or use **Terminal** in the toolbar to reach any `user@host` or open a shell
+on this computer. It is a real terminal, so vim, htop and tmux work, and it uses your
+system `ssh`, so `~/.ssh/config`, the agent and known hosts behave as usual. A saved SSH
+password is typed in for you at the login prompt. Sessions stay open when you switch tabs.
 
-**Close result tabs.** A script with many statements no longer leaves a row of results you
-cannot get rid of: close them one by one, all at once, or with a middle click.
+## Also
 
-**Middle click closes tabs**, in the editor tab bar too.
-
-## Fixed
-
-- **Windows opened a terminal window behind the app** on every start, and another for each
-  SSH tunnel. Both are gone. `Kasandra.exe --doctor` still prints its report to the
-  console it was started from.
-- Right-clicking empty space showed the webview's own Back / Refresh / Save as menu.
+The project now lives at github.com/mdenizay/kasandra. The old address redirects, so
+updates keep arriving whichever one your copy asks.
 
 ## Install
 
 | Platform | File |
 | --- | --- |
-| macOS (Apple Silicon and Intel) | `Kasandra_1.1.0_universal.dmg`, or `brew install --cask mdenizay/tap/kasandra` |
-| Windows | `Kasandra_1.1.0_x64-setup.exe` |
+| macOS (Apple Silicon and Intel) | `Kasandra_1.2.0_universal.dmg`, or `brew install --cask mdenizay/tap/kasandra` |
+| Windows | `Kasandra_1.2.0_x64-setup.exe` |
 | Linux | `.AppImage`, `.deb` or `.rpm` |
 
 macOS is signed with a Developer ID and notarised, so it opens with no warning. The
 Windows installer is unsigned — SmartScreen will ask; choose **More info → Run anyway**.
-It installs for the current user and needs no administrator rights.
 
-If you already have MieSQL, it will offer this update at launch.
+If you already have Kasandra or MieSQL, it will offer this update at launch.
