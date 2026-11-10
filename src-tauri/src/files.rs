@@ -319,7 +319,7 @@ enum Client {
     },
     Sftp {
         sftp: Arc<SftpSession>,
-        process: SshProcess,
+        process: Box<SshProcess>,
     },
 }
 
@@ -532,7 +532,7 @@ async fn connect_sftp(site: &FileSite, password: Option<&str>) -> DbResult<Clien
     match started {
         Ok(Ok(sftp)) => Ok(Client::Sftp {
             sftp: Arc::new(sftp),
-            process: SshProcess { child },
+            process: Box::new(SshProcess { child }),
         }),
         failed => {
             let _ = tokio::time::timeout(Duration::from_secs(2), child.wait()).await;
