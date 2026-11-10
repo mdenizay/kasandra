@@ -14,7 +14,7 @@ to the databases you point it at and, if you leave it on, the update check.
 
 ## Download
 
-[**Latest release**](https://github.com/mdenizay/miesql/releases/latest)
+[**Latest release**](https://github.com/mdenizay/kasandra/releases/latest)
 
 | Platform | File |
 | --- | --- |
@@ -34,8 +34,8 @@ to the databases you point it at and, if you leave it on, the update check.
 Would rather build it yourself? Reasonable, and quick:
 
 ```bash
-git clone https://github.com/mdenizay/miesql.git
-cd miesql
+git clone https://github.com/mdenizay/kasandra.git
+cd kasandra
 npm install
 npm run app:build
 ```
@@ -226,7 +226,7 @@ SSH tüneli, sekmede SSH terminali, düzenlenebilir tablo (çalıştırmadan ön
 sekmeleri, dump/restore, CSV içe aktarma ve Türkçe arayüz dahildir. MongoDB ve Firebase
 henüz yok.
 
-**İndirme:** [en son sürüm](https://github.com/mdenizay/miesql/releases/latest) — macOS
+**İndirme:** [en son sürüm](https://github.com/mdenizay/kasandra/releases/latest) — macOS
 için universal `.dmg` (Apple Silicon ve Intel), Windows için `.exe`, Linux için
 `.AppImage` / `.deb` / `.rpm`. macOS sürümü Developer ID ile imzalı ve Apple
 tarafından notarize edilmiştir — uyarısız açılır, yalnızca ilk açılış bir kerelik uzun

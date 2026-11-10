@@ -4,7 +4,7 @@ version = "1.1.0"
 description = "A fast, native SQL client"
 authors = ["mdenizay"]
 license = "MIT"
-repository = "https://github.com/mdenizay/miesql"
+repository = "https://github.com/mdenizay/kasandra"
 edition = "2021"
 rust-version = "1.77"
 

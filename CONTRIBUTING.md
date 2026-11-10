@@ -6,8 +6,8 @@ afternoon.
 ## Getting set up
 
 ```bash
-git clone https://github.com/mdenizay/miesql.git
-cd miesql
+git clone https://github.com/mdenizay/kasandra.git
+cd kasandra
 npm install
 npm run app:dev            # the app, with hot reload
 npm run build              # type-check and bundle the frontend

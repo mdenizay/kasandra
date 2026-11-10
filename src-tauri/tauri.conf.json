@@ -47,7 +47,7 @@
     "category": "DeveloperTool",
     "shortDescription": "A fast, native SQL client",
     "longDescription": "An open-source alternative to Navicat for PostgreSQL, MySQL, MariaDB, SQLite, Redis and MongoDB. All data stays on your device.",
-    "copyright": "MIT licensed. https://github.com/mdenizay/miesql",
+    "copyright": "MIT licensed. https://github.com/mdenizay/kasandra",
     "linux": {
       "deb": {
         "depends": [
@@ -71,7 +71,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/mdenizay/miesql/releases/latest/download/latest.json"
+        "https://github.com/mdenizay/kasandra/releases/latest/download/latest.json"
       ],
       "dialog": false,
       "windows": {
