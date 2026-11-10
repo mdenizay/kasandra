@@ -29,7 +29,7 @@ pub enum ConnectionUrlError {
     Empty,
     #[error("This does not look like a connection URL. Expected something like postgres://user:password@host:5432/database.")]
     UnrecognisedFormat,
-    #[error("\"{0}\" is not a database MieSQL supports. Use postgres, mysql, mariadb, sqlite, redis or mongodb.")]
+    #[error("\"{0}\" is not a database Kasandra supports. Use postgres, mysql, mariadb, sqlite, redis or mongodb.")]
     UnsupportedScheme(String),
     #[error("The URL has no database file path.")]
     MissingFilePath,

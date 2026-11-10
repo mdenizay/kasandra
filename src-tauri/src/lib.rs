@@ -69,7 +69,7 @@ pub fn run() {
             commands::csv_import,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running MieSQL");
+        .expect("error while running Kasandra");
 }
 
 /// A release build on Windows has no console of its own, so `--doctor` borrows the one it

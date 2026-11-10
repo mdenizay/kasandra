@@ -1,6 +1,6 @@
-# Contributing to MieSQL
+# Contributing to Kasandra
 
-Thanks for taking a look. MieSQL is small enough that a first patch is realistic in an
+Thanks for taking a look. Kasandra is small enough that a first patch is realistic in an
 afternoon.
 
 ## Getting set up

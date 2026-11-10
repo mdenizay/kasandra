@@ -99,7 +99,7 @@ pub async fn dump(
 
     let now = chrono::Utc::now().to_rfc3339();
     write_str!(format!(
-        "-- MieSQL dump\n-- Engine: {}\n-- Generated: {now}\n-- Tables: {}\n\n",
+        "-- Kasandra dump\n-- Engine: {}\n-- Generated: {now}\n-- Tables: {}\n\n",
         kind.display_name(),
         tables.len()
     ));

@@ -1,4 +1,4 @@
-//! Everything MieSQL writes lives under one folder, so "all data stays on this device" is
+//! Everything Kasandra writes lives under one folder, so "all data stays on this device" is
 //! something a user can verify by looking at a single directory. Passwords are the one
 //! exception: they go to the OS credential store, never to a file here.
 
@@ -9,7 +9,13 @@ use std::path::PathBuf;
 
 pub fn support_dir() -> PathBuf {
     let base = dirs::data_dir().unwrap_or_else(|| dirs::home_dir().unwrap_or_default());
-    let dir = base.join("MieSQL");
+    let dir = base.join("Kasandra");
+    // The app was called MieSQL before; carry its connections, history and settings over
+    // the first time the new name starts.
+    let legacy = base.join("MieSQL");
+    if !dir.exists() && legacy.is_dir() {
+        let _ = std::fs::rename(&legacy, &dir);
+    }
     let _ = std::fs::create_dir_all(&dir);
     dir
 }
@@ -72,6 +78,7 @@ pub fn save_profiles(profiles: &[ConnectionProfile]) -> DbResult<()> {
 
 // MARK: - Credentials
 
+// Kept from the MieSQL days on purpose: changing it would orphan every saved password.
 const CREDENTIAL_SERVICE: &str = "com.mdenizay.miesql";
 
 /// Writes a password, healing the case where an item already exists under a different
@@ -79,7 +86,7 @@ const CREDENTIAL_SERVICE: &str = "com.mdenizay.miesql";
 ///
 /// macOS ties a keychain item to the identity that created it. An unsigned or ad-hoc
 /// signed app gets a new identity on every build, so an item written by yesterday's build —
-/// or by a previous version of MieSQL entirely — is one this build is not allowed to
+/// or by a previous version of the app entirely — is one this build is not allowed to
 /// overwrite, and the write comes back as an opaque "platform secure storage failure".
 /// Removing the stale item and writing fresh turns that dead end into a no-op the user
 /// never sees.

@@ -173,7 +173,7 @@ impl Driver for MySqlDriver {
         }
         if profile.ssl_mode != SslMode::Disable {
             // Encrypt without validating the certificate, matching what ssl-mode=REQUIRED
-            // means to the MySQL clients. Validation is a separate mode MieSQL does not
+            // means to the MySQL clients. Validation is a separate mode Kasandra does not
             // implement yet and reports as downgraded rather than pretending to honour.
             builder = builder.ssl_opts(Some(
                 SslOpts::default()

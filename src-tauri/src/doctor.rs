@@ -4,7 +4,7 @@
 use crate::storage;
 
 pub fn run() -> i32 {
-    println!("MieSQL {}", env!("CARGO_PKG_VERSION"));
+    println!("Kasandra {}", env!("CARGO_PKG_VERSION"));
     println!(
         "Platform: {} {}",
         std::env::consts::OS,
@@ -43,7 +43,7 @@ pub fn run() -> i32 {
             println!(
                 "\nOn macOS this is usually a code signature problem: the keychain refuses\n\
                  apps it cannot identify. Re-signing the bundle normally fixes it:\n\
-                 \x20 codesign --force --deep --sign - /Applications/MieSQL.app"
+                 \x20 codesign --force --deep --sign - /Applications/Kasandra.app"
             );
             1
         }

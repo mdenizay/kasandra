@@ -1,4 +1,4 @@
-# MieSQL
+# Kasandra
 
 A fast, cross-platform SQL client — an open-source alternative to Navicat, for macOS,
 Windows and Linux.
@@ -18,8 +18,8 @@ to the databases you point it at and, if you leave it on, the update check.
 
 | Platform | File |
 | --- | --- |
-| macOS (Apple Silicon and Intel) | `MieSQL_*_universal.dmg` |
-| Windows | `MieSQL_*_x64-setup.exe` |
+| macOS (Apple Silicon and Intel) | `Kasandra_*_universal.dmg` |
+| Windows | `Kasandra_*_x64-setup.exe` |
 | Linux | `.AppImage`, `.deb` or `.rpm` |
 
 - **macOS:** signed with a Developer ID and notarised by Apple, so it opens with no
@@ -29,7 +29,7 @@ to the databases you point it at and, if you leave it on, the update check.
   publisher — choose **More info → Run anyway**. It installs for the current user and
   needs no administrator rights.
 - **Linux:** `chmod +x` the AppImage. Saving passwords needs a Secret Service provider
-  such as gnome-keyring or KWallet; without one MieSQL says so and asks each time instead.
+  such as gnome-keyring or KWallet; without one Kasandra says so and asks each time instead.
 
 Would rather build it yourself? Reasonable, and quick:
 
@@ -185,9 +185,9 @@ Everything lives in one folder, which Settings will show you:
 
 | Platform | Location |
 | --- | --- |
-| macOS | `~/Library/Application Support/MieSQL` |
-| Windows | `%APPDATA%\MieSQL` |
-| Linux | `~/.local/share/MieSQL` |
+| macOS | `~/Library/Application Support/Kasandra` |
+| Windows | `%APPDATA%\Kasandra` |
+| Linux | `~/.local/share/Kasandra` |
 
 `connections.json` holds profiles and never passwords, and is written `0600` on Unix.
 Passwords live in the OS credential store under the service `com.mdenizay.miesql`,
@@ -209,7 +209,7 @@ MIT. See [LICENSE](LICENSE).
 
 ## Türkçe
 
-MieSQL, macOS, Windows ve Linux için hızlı bir SQL istemcisidir — Navicat'e açık kaynak bir
+Kasandra, macOS, Windows ve Linux için hızlı bir SQL istemcisidir — Navicat'e açık kaynak bir
 alternatif. Rust ve React ile yazıldı, Tauri ile paketlendi. Electron yok, telemetri yok.
 Bağlantı profilleri, sorgu geçmişi ve ayarlar bu cihazda kalır; uygulama bağlandığınız
 veritabanları ve (açık bırakırsanız) güncelleme kontrolü dışında ağa çıkmaz.

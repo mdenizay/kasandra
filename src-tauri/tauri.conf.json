@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "MieSQL",
+  "productName": "Kasandra",
   "version": "1.0.0",
   "identifier": "com.mdenizay.miesql",
   "build": {
@@ -13,7 +13,7 @@
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "MieSQL",
+        "title": "Kasandra",
         "width": 1240,
         "height": 800,
         "minWidth": 900,

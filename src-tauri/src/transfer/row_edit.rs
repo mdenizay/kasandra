@@ -67,7 +67,7 @@ impl RowEditPlanner {
             .any(|edit| !matches!(edit, RowEdit::Insert { .. }));
         if needs_key && self.key_columns.is_empty() {
             return Err(DbError::new(format!(
-                "{} has no primary key or unique index, so MieSQL cannot identify a single \
+                "{} has no primary key or unique index, so Kasandra cannot identify a single \
                  row to change. Edit it with a SQL statement instead.",
                 self.table.qualified_name()
             )));

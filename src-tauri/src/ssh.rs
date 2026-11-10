@@ -40,7 +40,7 @@ impl SshTunnel {
         if which_ssh().is_none() {
             return Err(
                 DbError::new("No ssh client was found on this computer.").with_detail(
-                    "MieSQL tunnels through the system ssh command. macOS and Linux include \
+                    "Kasandra tunnels through the system ssh command. macOS and Linux include \
                      one; on Windows, install the OpenSSH Client from Optional Features.",
                 ),
             );
@@ -239,7 +239,7 @@ fn write_askpass_helper(_password: &str) -> DbResult<std::path::PathBuf> {
     Err(
         DbError::new("SSH password authentication is not supported on Windows.").with_detail(
             "Use a private key instead, or add the key to ssh-agent. Both work here because \
-         MieSQL tunnels through the system ssh client.",
+         Kasandra tunnels through the system ssh client.",
         ),
     )
 }

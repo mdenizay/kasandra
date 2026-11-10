@@ -366,6 +366,17 @@ export function App() {
     [activeTabId],
   );
 
+  const closeResult = useCallback(
+    (tab: Extract<Tab, { kind: "query" }>, index: number) => {
+      const results = tab.results.filter((_, i) => i !== index);
+      // Keep the same result in view when one before it closes.
+      const resultIndex =
+        index < tab.resultIndex ? tab.resultIndex - 1 : Math.min(tab.resultIndex, Math.max(results.length - 1, 0));
+      patchTab(tab.id, { results, resultIndex });
+    },
+    [patchTab],
+  );
+
   // MARK: - Running
 
   const execute = useCallback(
@@ -783,7 +794,19 @@ export function App() {
           {tabs.length > 0 && (
             <div className="tabs">
               {tabs.map((tab) => (
-                <button key={tab.id} className={`tab${tab.id === activeTabId ? " active" : ""}`} onClick={() => setActiveTabId(tab.id)}>
+                <button
+                  key={tab.id}
+                  className={`tab${tab.id === activeTabId ? " active" : ""}`}
+                  onClick={() => setActiveTabId(tab.id)}
+                  // Middle click closes, as in every browser and editor. mousedown is
+                  // cancelled so Windows does not start autoscroll instead.
+                  onMouseDown={(e) => {
+                    if (e.button === 1) e.preventDefault();
+                  }}
+                  onAuxClick={(e) => {
+                    if (e.button === 1) closeTab(tab.id);
+                  }}
+                >
                   {tab.kind === "query" ? <CommandLineIcon className="icon" /> : <TableCellsIcon className="icon" />}
                   {tab.title}
                   <span className="close" onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}>
@@ -898,16 +921,36 @@ export function App() {
                 )}
 
                 {queryTab.results.length > 1 && (
-                  <div className="query-toolbar">
+                  <div className="query-toolbar result-tabs">
                     {queryTab.results.map((r, index) => (
                       <button
                         key={index}
-                        className={index === queryTab.resultIndex ? "primary" : ""}
+                        className={`result-tab${index === queryTab.resultIndex ? " primary" : ""}`}
                         onClick={() => patchTab(queryTab.id, { resultIndex: index })}
+                        onMouseDown={(e) => {
+                          if (e.button === 1) e.preventDefault();
+                        }}
+                        onAuxClick={(e) => {
+                          if (e.button === 1) closeResult(queryTab, index);
+                        }}
+                        title={r.statement.trim()}
                       >
                         {index + 1}. {r.statement.trim().split(/\s+/)[0]?.toUpperCase()}
+                        <span
+                          className="close"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeResult(queryTab, index);
+                          }}
+                        >
+                          <XMarkIcon className="icon" style={{ width: 12, height: 12 }} />
+                        </span>
                       </button>
                     ))}
+                    <div className="spacer" />
+                    <button className="quiet" onClick={() => patchTab(queryTab.id, { results: [], resultIndex: 0 })}>
+                      {t("workspace.closeAllResults")}
+                    </button>
                   </div>
                 )}
 

@@ -7,7 +7,7 @@ interface Props {
   onCancel: () => void;
 }
 
-/** Used for anything MieSQL cannot undo, so the consequence is stated before it happens. */
+/** Used for anything Kasandra cannot undo, so the consequence is stated before it happens. */
 export function ConfirmDialog({
   title,
   message,

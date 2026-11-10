@@ -70,6 +70,7 @@ const en = {
   "workspace.connectHint": "Connect to the selected database, then open a query.",
   "workspace.runQueryHint": "Run a query to see results.",
   "workspace.database": "Database",
+  "workspace.closeAllResults": "Close all",
   "workspace.noResultSet": "Statement completed with no result set.",
   "workspace.rowsAffected": "%1 rows affected",
   "workspace.readOnly": "Read-only",
@@ -85,7 +86,7 @@ const en = {
   "data.pending": "%1 pending changes",
   "data.review": "Review Changes",
   "data.applyTitle": "Apply %1 changes?",
-  "data.applyBody": "These statements will run against %1. MieSQL cannot undo them.",
+  "data.applyBody": "These statements will run against %1. Kasandra cannot undo them.",
   "data.addRow": "Add Row",
   "data.deleteRows": "Delete Selected",
   "data.setNull": "Set to NULL",
@@ -171,7 +172,7 @@ const en = {
   "connection.urlClipboard": "Found a connection URL on the clipboard.",
   "connection.deleteTitle": "Delete this connection?",
   "connection.deleteBody":
-    "“%1” is removed from MieSQL and its saved password is deleted from the system credential store.\n\nThe database itself is not touched.",
+    "“%1” is removed from Kasandra and its saved password is deleted from the system credential store.\n\nThe database itself is not touched.",
   "connection.noCredentialStore":
     "This system has no credential store, so passwords cannot be saved. They will be asked for each time.",
 
@@ -183,7 +184,7 @@ const en = {
   "ssh.password": "SSH password",
   "ssh.keyPath": "Private key",
   "ssh.keyHint":
-    "Leave empty to use ssh-agent and ~/.ssh/config. MieSQL tunnels through the system ssh client, so whatever already works in a terminal works here.",
+    "Leave empty to use ssh-agent and ~/.ssh/config. Kasandra tunnels through the system ssh client, so whatever already works in a terminal works here.",
   "ssh.hostHint": "The host and port above are the ones the database sees from the SSH server.",
 
   "settings.title": "Settings",
@@ -206,20 +207,20 @@ const en = {
   "settings.checkNow": "Check now",
   "settings.upToDate": "Up to date.",
   "settings.privacy":
-    "MieSQL stores everything on this device. It makes no network calls except to the databases you connect to and, if enabled above, the update check.",
+    "Kasandra stores everything on this device. It makes no network calls except to the databases you connect to and, if enabled above, the update check.",
   "settings.dataLocation": "Data is stored at",
 
-  "update.available": "MieSQL %1 is available.",
+  "update.available": "Kasandra %1 is available.",
   "update.download": "Download",
   "update.later": "Later",
   "update.downloading": "Downloading %1…",
-  "update.ready": "MieSQL %1 is ready to install.",
+  "update.ready": "Kasandra %1 is ready to install.",
   "update.restart": "Restart now",
   "update.onNextLaunch": "On next launch",
   "update.installing": "Installing…",
 
   "confirm.destructiveTitle": "Run this statement?",
-  "confirm.destructiveBody": "%1 changes data or schema, and MieSQL cannot undo it.",
+  "confirm.destructiveBody": "%1 changes data or schema, and Kasandra cannot undo it.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -282,6 +283,7 @@ const tr: Partial<Record<MessageKey, string>> = {
   "workspace.connectHint": "Seçili veritabanına bağlanın, sonra sorgu açın.",
   "workspace.runQueryHint": "Sonuçları görmek için bir sorgu çalıştırın.",
   "workspace.database": "Veritabanı",
+  "workspace.closeAllResults": "Tümünü kapat",
   "workspace.noResultSet": "İfade sonuç kümesi olmadan tamamlandı.",
   "workspace.rowsAffected": "%1 satır etkilendi",
   "workspace.readOnly": "Salt okunur",
@@ -297,7 +299,7 @@ const tr: Partial<Record<MessageKey, string>> = {
   "data.pending": "%1 bekleyen değişiklik",
   "data.review": "Değişiklikleri Gözden Geçir",
   "data.applyTitle": "%1 değişiklik uygulansın mı?",
-  "data.applyBody": "Bu ifadeler %1 üzerinde çalışacak. MieSQL bunu geri alamaz.",
+  "data.applyBody": "Bu ifadeler %1 üzerinde çalışacak. Kasandra bunu geri alamaz.",
   "data.addRow": "Satır Ekle",
   "data.deleteRows": "Seçilileri Sil",
   "data.setNull": "NULL Yap",
@@ -383,7 +385,7 @@ const tr: Partial<Record<MessageKey, string>> = {
   "connection.urlClipboard": "Panoda bir bağlantı URL'i bulundu.",
   "connection.deleteTitle": "Bu bağlantı silinsin mi?",
   "connection.deleteBody":
-    "“%1” MieSQL'den kaldırılır ve kayıtlı parolası sistem kimlik deposundan silinir.\n\nVeritabanının kendisine dokunulmaz.",
+    "“%1” Kasandra'den kaldırılır ve kayıtlı parolası sistem kimlik deposundan silinir.\n\nVeritabanının kendisine dokunulmaz.",
   "connection.noCredentialStore":
     "Bu sistemde kimlik deposu yok, parolalar saklanamaz. Her seferinde sorulacak.",
 
@@ -395,7 +397,7 @@ const tr: Partial<Record<MessageKey, string>> = {
   "ssh.password": "SSH parolası",
   "ssh.keyPath": "Özel anahtar",
   "ssh.keyHint":
-    "ssh-agent ve ~/.ssh/config kullanmak için boş bırakın. MieSQL sistemdeki ssh istemcisini kullanır; terminalde çalışan burada da çalışır.",
+    "ssh-agent ve ~/.ssh/config kullanmak için boş bırakın. Kasandra sistemdeki ssh istemcisini kullanır; terminalde çalışan burada da çalışır.",
   "ssh.hostHint": "Yukarıdaki sunucu ve port, SSH sunucusundan görüldüğü hâlidir.",
 
   "settings.title": "Ayarlar",
@@ -418,20 +420,20 @@ const tr: Partial<Record<MessageKey, string>> = {
   "settings.checkNow": "Şimdi denetle",
   "settings.upToDate": "Güncel.",
   "settings.privacy":
-    "MieSQL her şeyi bu cihazda saklar. Bağlandığınız veritabanları ve (açıksa) güncelleme denetimi dışında ağa çıkmaz.",
+    "Kasandra her şeyi bu cihazda saklar. Bağlandığınız veritabanları ve (açıksa) güncelleme denetimi dışında ağa çıkmaz.",
   "settings.dataLocation": "Veriler şurada",
 
-  "update.available": "MieSQL %1 yayınlandı.",
+  "update.available": "Kasandra %1 yayınlandı.",
   "update.download": "İndir",
   "update.later": "Sonra",
   "update.downloading": "%1 indiriliyor…",
-  "update.ready": "MieSQL %1 kurulmaya hazır.",
+  "update.ready": "Kasandra %1 kurulmaya hazır.",
   "update.restart": "Şimdi yeniden başlat",
   "update.onNextLaunch": "Sonraki açılışta",
   "update.installing": "Kuruluyor…",
 
   "confirm.destructiveTitle": "Bu ifade çalıştırılsın mı?",
-  "confirm.destructiveBody": "%1 veriyi veya şemayı değiştirir ve MieSQL bunu geri alamaz.",
+  "confirm.destructiveBody": "%1 veriyi veya şemayı değiştirir ve Kasandra bunu geri alamaz.",
 };
 
 const TABLES: Record<string, Partial<Record<MessageKey, string>>> = { en, tr };

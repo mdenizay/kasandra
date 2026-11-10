@@ -6,7 +6,7 @@
 //!
 //! Certificates are **not** validated. That matches what `sslmode=require` means in libpq
 //! and what `ssl-mode=REQUIRED` means in MySQL: encrypt the connection, but do not check
-//! who is on the other end. Validation is `verify-ca`/`verify-full`, which MieSQL does not
+//! who is on the other end. Validation is `verify-ca`/`verify-full`, which Kasandra does not
 //! implement yet and reports as downgraded rather than pretending to honour.
 
 use crate::error::{DbError, DbResult};

@@ -111,7 +111,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ env.TAG }}
-          releaseName: MieSQL ${{ env.TAG }}
+          releaseName: Kasandra ${{ env.TAG }}
           releaseBody: ${{ steps.notes.outputs.body }}
           # Drafted on purpose: three jobs write to one release, so publishing on the first
           # to finish would show a release carrying only macOS files while Linux and
